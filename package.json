@@ -1,0 +1,22 @@
+{
+  "name": "clientgraph",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ClientGraph — freelancer client memory graph on Neo4j Relate",
+  "workspaces": [
+    "packages/server",
+    "packages/web"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "seed": "npm run seed -w @clientgraph/server",
+    "test": "npm run test -w @clientgraph/server",
+    "dev": "npm run dev -w @clientgraph/server & npm run dev -w @clientgraph/web",
+    "build": "npm run build -w @clientgraph/server && npm run build -w @clientgraph/web",
+    "start": "npm run start -w @clientgraph/server"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
