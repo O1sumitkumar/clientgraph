@@ -9,4 +9,5 @@ coverage/
 .vite/
 data/*.rl
 data/clientgraph/
-*.local*.tsbuildinfo
+*.local
+*.tsbuildinfo
