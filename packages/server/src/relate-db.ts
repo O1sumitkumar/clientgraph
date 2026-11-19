@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { createRequire } from "node:module";
-import { Database, type Connection, RelateError } from "@relate/relate";
+import { Database, type Connection, type ParamValue, RelateError } from "@relate/relate";
 import { DATA_DIR, STORE_PATH } from "./paths.js";
 
 const require = createRequire(import.meta.url);
@@ -9,6 +9,21 @@ const { version: RELATE_PKG_VERSION } = require("@relate/relate/package.json") a
 };
 
 export { RelateError, RELATE_PKG_VERSION };
+export type { Connection, ParamValue };
+
+/** Cypher parameter map accepted by Relate's query(). */
+export type Params = { [name: string]: ParamValue };
+
+/**
+ * A result row. Shape is fixed by each query's RETURN clause (nodes, scalars, lists),
+ * so callers read fields by name.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type GraphRow = Record<string, any>;
+
+export function queryRows(conn: Connection, cypher: string, params: Params = {}): GraphRow[] {
+  return conn.query(cypher, params).rows as GraphRow[];
+}
 
 export function ensureDataDir(): void {
   fs.mkdirSync(DATA_DIR, { recursive: true });

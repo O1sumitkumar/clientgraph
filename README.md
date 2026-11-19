@@ -15,6 +15,14 @@ npm test        # ingest + 6 golden Q&A tests
 npm run dev     # API :9847 + UI :9848
 ```
 
+Single-port production run (built UI served by the API):
+
+```bash
+npm run build && npm start   # open http://127.0.0.1:9847
+```
+
+Verify everything in one step: `npm run verify` (seed + tests + build).
+
 Open **http://127.0.0.1:9848** and try:
 
 1. Who approved the scope change for the cohort comparison module?

@@ -1,4 +1,4 @@
-import type { Connection } from "./relate-db.js";
+import type { Connection, Params } from "./relate-db.js";
 
 export type GraphNode = {
   id: string;
@@ -32,7 +32,7 @@ function relId(rel: { elementId?: string; type?: string }): string {
 export function pathFromRow(
   conn: Connection,
   cypher: string,
-  params: Record<string, unknown>,
+  params: Params,
 ): EvidencePath {
   const result = conn.query(cypher, params);
   const nodes = new Map<string, GraphNode>();

@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express from "express";
 import { askAgent } from "./agent/planner.js";
@@ -57,6 +60,13 @@ app.get("/api/graph/sample", (_req, res) => {
     res.status(500).json({ error: e instanceof Error ? e.message : String(e) });
   }
 });
+
+// Serve the built web UI (npm run build) so `npm start` is a single-port demo.
+const WEB_DIST = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../web/dist");
+if (fs.existsSync(path.join(WEB_DIST, "index.html"))) {
+  app.use(express.static(WEB_DIST));
+  app.get(/^\/(?!api\/).*/, (_req, res) => res.sendFile(path.join(WEB_DIST, "index.html")));
+}
 
 if (!storeExists()) {
   console.log("No store at", STORE_PATH, "— seeding on startup…");

@@ -13,7 +13,8 @@
     "test": "npm run test -w @clientgraph/server",
     "dev": "npm run dev -w @clientgraph/server & npm run dev -w @clientgraph/web",
     "build": "npm run build -w @clientgraph/server && npm run build -w @clientgraph/web",
-    "start": "npm run start -w @clientgraph/server"
+    "start": "npm run start -w @clientgraph/server",
+    "verify": "npm run seed && npm test && npm run build"
   },
   "license": "MIT",
   "engines": {

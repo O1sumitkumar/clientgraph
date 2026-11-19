@@ -1,4 +1,4 @@
-import type { Connection } from "../relate-db.js";
+import { queryRows, type Connection, type Params } from "../relate-db.js";
 import { pathFromRow } from "../graph-path.js";
 import { hybridSearchMessages } from "../hybrid.js";
 import type { AgentAnswer } from "./types.js";
@@ -57,7 +57,7 @@ function answerScopeApproval(conn: Connection, question: string): AgentAnswer {
     ? "SC-NW-02"
     : undefined;
 
-  const params: Record<string, unknown> = {};
+  const params: Params = {};
   const match = scopeId
     ? `MATCH (s:ScopeItem {id: $scopeId})`
     : `MATCH (s:ScopeItem {kind: 'change'})`;
@@ -72,7 +72,7 @@ function answerScopeApproval(conn: Connection, question: string): AgentAnswer {
     ORDER BY s.addedAt DESC
     LIMIT 3`;
 
-  const rows = conn.query(cypher, params).rows;
+  const rows = queryRows(conn, cypher, params);
   const path = pathFromRow(
     conn,
     cypher,
@@ -120,7 +120,7 @@ function answerUnpaidOverdue(conn: Connection, question: string): AgentAnswer {
     RETURN i, p, cl, paid
     ORDER BY i.dueAt ASC`;
 
-  const rows = conn.query(cypher, { today: TODAY }).rows;
+  const rows = queryRows(conn, cypher, { today: TODAY });
   const path = pathFromRow(conn, cypher, { today: TODAY });
 
   if (rows.length === 0) {
@@ -170,7 +170,7 @@ function answerRelationshipRisk(conn: Connection, question: string): AgentAnswer
     RETURN cl, p, invoices, messages, reasons
     ORDER BY p.riskScore DESC`;
 
-  const rows = conn.query(cypher, { minScore: 50 }).rows;
+  const rows = queryRows(conn, cypher, { minScore: 50 });
   const path = pathFromRow(conn, cypher, { minScore: 50 });
 
   const summaries = rows.map((r) => {
@@ -211,7 +211,7 @@ function answerContactLookup(conn: Connection, question: string): AgentAnswer {
     MATCH (cl:Client {slug: $slug})<-[:WORKS_FOR]-(ct:Contact)
   RETURN cl, ct`;
   const path = pathFromRow(conn, cypher, { slug });
-  const rows = conn.query(cypher, { slug }).rows;
+  const rows = queryRows(conn, cypher, { slug });
   const contact = rows[0]?.ct?.properties as { name?: string; role?: string } | undefined;
   const client = rows[0]?.cl?.properties as { name?: string } | undefined;
 
@@ -237,9 +237,9 @@ function answerDeliverableLookup(conn: Connection, question: string): AgentAnswe
     : `MATCH (p:Project)<-[:DELIVERED_FOR]-(d:Deliverable)
        WHERE toLower(d.title) CONTAINS 'dashboard' OR d.type = 'pr'
        RETURN p, d ORDER BY d.deliveredAt DESC LIMIT 5`;
-  const params = slug ? { slug } : {};
+  const params: Params = slug ? { slug } : {};
   const path = pathFromRow(conn, cypher, params);
-  const rows = conn.query(cypher, params).rows;
+  const rows = queryRows(conn, cypher, params);
 
   const items = rows.map((r) => {
     const d = r.d.properties as { title: string; type: string; url: string };
