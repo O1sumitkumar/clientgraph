@@ -28,6 +28,9 @@ Open **http://127.0.0.1:9848** and try:
 1. Who approved the scope change for the cohort comparison module?
 2. What is unpaid and overdue?
 3. Which client relationships are at risk and why?
+4. Who asked us to resend the statement of work? *(free-form → hybrid FULLTEXT + VECTOR retrieval)*
+
+Each answer draws its **evidence path**: the nodes returned by the agent's Cypher plus every Relate relationship connecting them. The header shows live store stats from `/api/health` (nodes, relationships, search indexes).
 
 No API keys required for the default demo.
 

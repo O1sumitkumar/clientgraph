@@ -26,11 +26,33 @@ function getConn() {
 }
 
 app.get("/api/health", (_req, res) => {
+  const seeded = storeExists();
+  let stats: { nodes: number; relationships: number; searchIndexes: number } | null = null;
+  if (seeded) {
+    try {
+      const conn = openStore({ readOnly: true });
+      const nodes = Number(conn.query("MATCH (n) RETURN count(n) AS n").single().n);
+      const relationships = Number(conn.query("MATCH ()-[r]->() RETURN count(r) AS n").single().n);
+      const searchIndexes = Number(
+        conn
+          .query(
+            `SHOW INDEXES YIELD name, type
+             WHERE type IN ['FULLTEXT', 'VECTOR']
+             RETURN count(name) AS n`,
+          )
+          .single().n,
+      );
+      stats = { nodes, relationships, searchIndexes };
+    } catch {
+      stats = null;
+    }
+  }
   res.json({
     ok: true,
     relatePackage: RELATE_PKG_VERSION,
     storePath: STORE_PATH,
-    seeded: storeExists(),
+    seeded,
+    stats,
   });
 });
 

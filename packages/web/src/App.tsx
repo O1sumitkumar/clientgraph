@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GraphView, type EvidencePath } from "./GraphView";
 
 type AgentAnswer = {
@@ -13,7 +13,15 @@ const SAMPLE_QUESTIONS = [
   "Who approved the scope change for the cohort comparison module?",
   "What is unpaid and overdue?",
   "Which client relationships are at risk and why?",
+  "Who asked us to resend the statement of work?",
 ];
+
+type Health = {
+  relatePackage: string;
+  storePath: string;
+  seeded: boolean;
+  stats: { nodes: number; relationships: number; searchIndexes: number } | null;
+};
 
 const emptyPath: EvidencePath = { nodes: [], edges: [] };
 
@@ -22,6 +30,14 @@ export function App() {
   const [result, setResult] = useState<AgentAnswer | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [health, setHealth] = useState<Health | null>(null);
+
+  useEffect(() => {
+    fetch("/api/health")
+      .then((r) => r.json())
+      .then((h: Health) => setHealth(h))
+      .catch(() => setHealth(null));
+  }, []);
 
   const ask = useCallback(async () => {
     setLoading(true);
@@ -51,6 +67,20 @@ export function App() {
           Freelancer client memory on Neo4j Relate — hybrid retrieval plus graph paths that justify
           each answer.
         </p>
+        {health && (
+          <p className="store-bar" data-testid="store-bar">
+            <span className="pill">Relate {health.relatePackage}</span>
+            <span>{health.storePath.split(/[\\/]/).pop()}</span>
+            {health.stats ? (
+              <span>
+                {health.stats.nodes} nodes · {health.stats.relationships} relationships ·{" "}
+                {health.stats.searchIndexes} FULLTEXT/VECTOR indexes
+              </span>
+            ) : (
+              <span>{health.seeded ? "store found" : "not seeded — run npm run seed"}</span>
+            )}
+          </p>
+        )}
       </header>
 
       <div className="layout">
@@ -83,9 +113,10 @@ export function App() {
                 Intent: {result.intent} · Planner: {result.planner}
               </p>
               {result.cypher.length > 0 && (
-                <pre className="meta" style={{ overflow: "auto" }}>
-                  {result.cypher.join("\n\n")}
-                </pre>
+                <details className="cypher">
+                  <summary>Cypher run on Relate</summary>
+                  <pre className="meta">{result.cypher.join("\n\n")}</pre>
+                </details>
               )}
             </>
           )}

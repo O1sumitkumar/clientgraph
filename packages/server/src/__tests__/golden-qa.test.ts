@@ -34,6 +34,12 @@ describe("ClientGraph golden Q&A", () => {
     expect(answer.answer).toMatch(/Maya Chen/i);
     expect(answer.answer).toMatch(/SC-NW-02/);
     expect(answer.path.nodes.length).toBeGreaterThan(0);
+    const types = answer.path.edges.map((e) => e.type);
+    expect(types).toEqual(expect.arrayContaining(["APPROVES", "GAVE_APPROVAL", "EVIDENCES", "PART_OF", "BELONGS_TO"]));
+    const ids = new Set(answer.path.nodes.map((n) => n.id));
+    for (const e of answer.path.edges) {
+      expect(ids.has(e.from) && ids.has(e.to)).toBe(true);
+    }
   });
 
   it("Q2: unpaid and overdue invoices", async () => {
